@@ -41,12 +41,12 @@ def _prompt(text: str) -> str:
 def print_menu() -> None:
     print("\n=== Gestion de stock (JSON → SQLite) ===")
     print("1) Initialiser le stock (depuis un JSON)")
-    print("2) Afficher l’inventaire")
-    print("3) Ajouter un produit   (TODO)")
-    print("4) Modifier un produit  (TODO)")
-    print("5) Supprimer un produit (TODO)")
-    print("6) Vendre un produit    (TODO)")
-    print("7) Tableau de bord      (TODO)")
+    print("2) Afficher l'inventaire")
+    print("3) Ajouter un produit")
+    print("4) Modifier un produit")
+    print("5) Supprimer un produit")
+    print("6) Vendre un produit")
+    print("7) Tableau de bord")
     print("8) Quitter")
 
 
@@ -172,6 +172,28 @@ def action_sell_product(app: InventoryManager) -> None:
     except ValueError as e:
         print(f"Erreur : {e}")
 
+def action_dashboard(app: InventoryManager) -> None:
+    """Affiche le tableau de bord des ventes."""
+    print("\n=== TABLEAU DE BORD ===")
+    
+    try:
+        stats = app.get_dashboard()
+        
+        if stats["nb_ventes"] == 0:
+            print("(Aucune vente enregistrée)")
+            return
+        
+        print(f"\n📊 Statistiques globales :")
+        print(f"  Nombre de ventes : {stats['nb_ventes']}")
+        print(f"  Quantité totale vendue : {stats['qty_totale']}")
+        print(f"\n💰 Chiffre d'affaires :")
+        print(f"  CA HT        : {stats['ca_ht']:.2f} €")
+        print(f"  TVA totale   : {stats['tva_totale']:.2f} €")
+        print(f"  CA TTC       : {stats['ca_ttc']:.2f} €")
+        
+    except Exception as e:
+        print(f"Erreur : {e}")
+
 def main() -> int:
     parser = build_parser()
     args = parser.parse_args()
@@ -199,8 +221,8 @@ def main() -> int:
                 action_delete_product(app)
             elif choice == "6":
                 action_sell_product(app)
-            elif choice in {"7"}:
-                print("Fonctionnalité TODO : à implémenter par l'étudiant selon l'énoncé.")
+            elif choice == "7":
+                action_dashboard(app)
             elif choice == "8":
                 print("Au revoir.")
                 return 0
