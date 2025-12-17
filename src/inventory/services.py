@@ -67,6 +67,34 @@ class InventoryManager:
         self.repo.create_schema_if_needed()
         return self.repo.list_products()
 
+def add_product(self, sku: str, name: str, category: str, 
+                    unit_price_ht: float, quantity: int, vat_rate: float = 0.20) -> None:
+        """Ajoute un nouveau produit."""
+        # validation basique
+        if unit_price_ht < 0:
+            raise ValueError("Prix HT doit être >= 0")
+        if quantity < 0:
+            raise ValueError("Quantité doit être >= 0")
+        if not (0 <= vat_rate <= 1):
+            raise ValueError("TVA doit être entre 0 et 1")
+        
+        # verif sku unique
+        existing = self.repo.get_product_by_sku(sku)
+        if existing:
+            raise ValueError(f"SKU {sku} existe déjà")
+        
+        prod = Product(
+            sku=sku,
+            name=name,
+            category=category,
+            unit_price_ht=unit_price_ht,
+            quantity=quantity,
+            vat_rate=vat_rate,
+            created_at=now_iso(),
+        )
+        self.repo.insert_product(prod)
+        logger.info("Produit ajouté : %s", sku)
+
     # TODO (étudiant) :
     # - add_product / update_product / delete_product
     # - sell_product (transaction atomique + calculs)
