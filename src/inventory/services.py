@@ -34,6 +34,15 @@ class InventoryManager:
         self.config = config
         self.repo = repo or SQLiteRepository(config.db_path)
 
+    def sell_product(self, sku: str, quantity: int) -> dict:
+        """Vend un produit (transaction atomique)."""
+        if quantity <= 0:
+            raise ValueError("Quantité doit être > 0")
+        
+        result = self.repo.sell_product_transaction(sku, quantity)
+        logger.info("Vente effectuée : %s", result)
+        return result
+
     def initialize_from_json(self, json_path: str, reset: bool = True) -> int:
         """Initialise la DB depuis un JSON."""
         logger.info("Initialization requested from JSON: %s", json_path)

@@ -32,10 +32,9 @@ class Product:
     created_at: Optional[str] = None
 
 
-@dataclass(frozen=True)
+@dataclass
 class Sale:
-    """Une vente enregistrée dans la table `sales` (à compléter en exercice)."""
-
+    """Représente une vente."""
     product_id: int
     sku: str
     quantity: int
@@ -45,7 +44,7 @@ class Sale:
     total_vat: float
     total_ttc: float
     sold_at: str
-
+    id: Optional[int] = None
 
 def now_iso() -> str:
     """Date UTC ISO-8601 (ex: 2025-12-13T12:00:00Z)."""

@@ -69,6 +69,65 @@ class SQLiteRepository:
 
     def __init__(self, db_path: str) -> None:
         self.db_path = db_path
+    
+    def sell_product_transaction(self, sku: str, quantity_sold: int) -> dict:
+        """
+        Transaction atomique : enregistre vente + decremente stock.
+        Retourne un dict avec les details de la vente.
+        """
+        with self.connect() as conn:
+            try:
+                # 1) Récuperer le produit
+                product = self.get_product_by_sku(sku)
+                if not product:
+                    raise DatabaseError(f"Produit {sku} introuvable")
+                
+                # 2) Verifier stock
+                if product.quantity < quantity_sold:
+                    raise DatabaseError(
+                        f"Stock insuffisant pour {sku}. "
+                        f"Disponible: {product.quantity}, demandé: {quantity_sold}"
+                    )
+                
+                # 3) Calculs
+                total_ht = round(product.unit_price_ht * quantity_sold, 2)
+                total_vat = round(total_ht * product.vat_rate, 2)
+                total_ttc = round(total_ht + total_vat, 2)
+                
+                # 4) Inserer la vente
+                cur = conn.execute(
+                    """
+                    INSERT INTO sales(product_id, sku, quantity, unit_price_ht, vat_rate,
+                                      total_ht, total_vat, total_ttc, sold_at)
+                    VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (product.id, sku, quantity_sold, product.unit_price_ht, product.vat_rate,
+                     total_ht, total_vat, total_ttc, now_iso())
+                )
+                sale_id = cur.lastrowid
+                
+                # 5) Decrementer le stock
+                new_qty = product.quantity - quantity_sold
+                conn.execute(
+                    "UPDATE products SET quantity = ? WHERE sku = ?",
+                    (new_qty, sku)
+                )
+                
+                conn.commit()
+                logger.info("Vente enregistrée : %s x%d = %.2f€ TTC", sku, quantity_sold, total_ttc)
+                
+                return {
+                    "sale_id": sale_id,
+                    "sku": sku,
+                    "quantity": quantity_sold,
+                    "total_ht": total_ht,
+                    "total_vat": total_vat,
+                    "total_ttc": total_ttc,
+                }
+                
+            except sqlite3.Error as e:
+                conn.rollback()
+                raise DatabaseError(f"Erreur transaction vente: {e}") from e
 
     @contextmanager
     def connect(self) -> Iterable[sqlite3.Connection]:
@@ -180,6 +239,7 @@ class SQLiteRepository:
                 quantity=int(row["quantity"]),
                 created_at=str(row["created_at"]),
             )
+        
         
 def update_product(self, sku: str, name: str | None = None, 
                       category: str | None = None, 
