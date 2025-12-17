@@ -153,6 +153,24 @@ def action_delete_product(app: InventoryManager) -> None:
     app.delete_product(sku)
     print(f"Produit {sku} supprimé !")
 
+def action_sell_product(app: InventoryManager) -> None:
+    """Vendre un produit."""
+    print("\n--- Vendre un produit ---")
+    sku = _prompt("SKU du produit : ")
+    qty_str = _prompt("Quantité à vendre : ")
+    
+    try:
+        qty = int(qty_str)
+        result = app.sell_product(sku, qty)
+        
+        print(f"\n✓ Vente enregistrée !")
+        print(f"  SKU: {result['sku']}")
+        print(f"  Quantité: {result['quantity']}")
+        print(f"  Total HT: {result['total_ht']:.2f} €")
+        print(f"  TVA: {result['total_vat']:.2f} €")
+        print(f"  Total TTC: {result['total_ttc']:.2f} €")
+    except ValueError as e:
+        print(f"Erreur : {e}")
 
 def main() -> int:
     parser = build_parser()
@@ -179,7 +197,9 @@ def main() -> int:
                 action_update_product(app)
             elif choice == "5":
                 action_delete_product(app)
-            elif choice in {"6", "7"}:
+            elif choice == "6":
+                action_sell_product(app)
+            elif choice in {"7"}:
                 print("Fonctionnalité TODO : à implémenter par l'étudiant selon l'énoncé.")
             elif choice == "8":
                 print("Au revoir.")
