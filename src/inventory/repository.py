@@ -128,6 +128,30 @@ class SQLiteRepository:
             except sqlite3.Error as e:
                 conn.rollback()
                 raise DatabaseError(f"Erreur transaction vente: {e}") from e
+ 
+    def get_dashboard_stats(self) -> dict:
+        """Calcule les statistiques de ventes (CA HT, TVA, TTC, nb ventes, qty totale)."""
+        with self.connect() as conn:
+            cur = conn.execute(
+                """
+                SELECT 
+                    COUNT(*) as nb_ventes,
+                    COALESCE(SUM(quantity), 0) as qty_totale,
+                    COALESCE(SUM(total_ht), 0) as ca_ht,
+                    COALESCE(SUM(total_vat), 0) as tva_totale,
+                    COALESCE(SUM(total_ttc), 0) as ca_ttc
+                FROM sales
+                """
+            )
+            row = cur.fetchone()
+            
+            return {
+                "nb_ventes": int(row["nb_ventes"]),
+                "qty_totale": int(row["qty_totale"]),
+                "ca_ht": round(float(row["ca_ht"]), 2),
+                "tva_totale": round(float(row["tva_totale"]), 2),
+                "ca_ttc": round(float(row["ca_ttc"]), 2),
+            }            
 
     @contextmanager
     def connect(self) -> Iterable[sqlite3.Connection]:
@@ -364,4 +388,3 @@ def delete_product(self, sku: str) -> None:
                 conn.rollback()
                 raise DatabaseError(f"Erreur delete produit: {e}") from e
 
-    # TODO (étudiant) : CRUD complet, vente atomique, dashboard, export ventes

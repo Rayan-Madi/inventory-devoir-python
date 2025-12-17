@@ -43,6 +43,13 @@ class InventoryManager:
         logger.info("Vente effectuée : %s", result)
         return result
 
+    def get_dashboard(self) -> dict:
+        """Retourne les stats dashboard."""
+        self.repo.create_schema_if_needed()
+        stats = self.repo.get_dashboard_stats()
+        logger.info("Dashboard consulté")
+        return stats
+
     def initialize_from_json(self, json_path: str, reset: bool = True) -> int:
         """Initialise la DB depuis un JSON."""
         logger.info("Initialization requested from JSON: %s", json_path)
@@ -125,9 +132,3 @@ class InventoryManager:
         """Supprime un produit."""
         self.repo.delete_product(sku)
         logger.info("Produit %s supprimé", sku)
-
-    # TODO (étudiant) :
-    # - add_product / update_product / delete_product
-    # - sell_product (transaction atomique + calculs)
-    # - dashboard (totaux)
-    # - export_sales_csv
