@@ -67,7 +67,7 @@ class InventoryManager:
         self.repo.create_schema_if_needed()
         return self.repo.list_products()
 
-def add_product(self, sku: str, name: str, category: str, 
+    def add_product(self, sku: str, name: str, category: str, 
                     unit_price_ht: float, quantity: int, vat_rate: float = 0.20) -> None:
         """Ajoute un nouveau produit."""
         # validation basique
@@ -94,7 +94,8 @@ def add_product(self, sku: str, name: str, category: str,
         )
         self.repo.insert_product(prod)
         logger.info("Produit ajouté : %s", sku)
-def update_product(self, sku: str, name: str | None = None,
+
+    def update_product(self, sku: str, name: str | None = None,
                       category: str | None = None,
                       unit_price_ht: float | None = None,
                       quantity: int | None = None,
@@ -111,7 +112,7 @@ def update_product(self, sku: str, name: str | None = None,
         self.repo.update_product(sku, name, category, unit_price_ht, quantity, vat_rate)
         logger.info("Produit %s modifié", sku)
 
-def delete_product(self, sku: str) -> None:
+    def delete_product(self, sku: str) -> None:
         """Supprime un produit."""
         self.repo.delete_product(sku)
         logger.info("Produit %s supprimé", sku)
