@@ -90,6 +90,28 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--log-level", default="INFO", help="DEBUG/INFO/WARNING/ERROR")
     return p
 
+def action_add_product(app: InventoryManager) -> None:
+    """Ajouter un produit."""
+    print("\n--- Ajouter un produit ---")
+    sku = _prompt("SKU : ")
+    name = _prompt("Nom : ")
+    category = _prompt("Catégorie : ")
+    
+    prix_str = _prompt("Prix HT : ")
+    qty_str = _prompt("Quantité : ")
+    tva_str = _prompt("TVA (défaut 0.20) : ") or "0.20"
+    
+    try:
+        prix_ht = float(prix_str)
+        qty = int(qty_str)
+        tva = float(tva_str)
+    except ValueError:
+        print("Erreur : prix/quantité/TVA invalides")
+        return
+    
+    app.add_product(sku, name, category, prix_ht, qty, tva)
+    print(f"Produit {sku} ajouté avec succès !")
+
 
 def main() -> int:
     parser = build_parser()
@@ -110,7 +132,9 @@ def main() -> int:
                 action_initialize(app)
             elif choice == "2":
                 action_list_inventory(app)
-            elif choice in {"3", "4", "5", "6", "7"}:
+            elif choice == "3":
+                action_add_product(app)
+            elif choice in { "4", "5", "6", "7"}:
                 print("Fonctionnalité TODO : à implémenter par l'étudiant selon l'énoncé.")
             elif choice == "8":
                 print("Au revoir.")
