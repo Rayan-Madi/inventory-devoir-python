@@ -183,10 +183,10 @@ def action_dashboard(app: InventoryManager) -> None:
             print("(Aucune vente enregistrée)")
             return
         
-        print(f"\n📊 Statistiques globales :")
+        print(f"\n Statistiques globales :")
         print(f"  Nombre de ventes : {stats['nb_ventes']}")
         print(f"  Quantité totale vendue : {stats['qty_totale']}")
-        print(f"\n💰 Chiffre d'affaires :")
+        print(f"\n Chiffre d'affaires :")
         print(f"  CA HT        : {stats['ca_ht']:.2f} €")
         print(f"  TVA totale   : {stats['tva_totale']:.2f} €")
         print(f"  CA TTC       : {stats['ca_ttc']:.2f} €")
