@@ -144,8 +144,8 @@ class SQLiteRepository:
                     created_at=str(row["created_at"]),
                 ))
             return out
-        
-def get_product_by_sku(self, sku: str) -> Product | None:
+    
+    def get_product_by_sku(self, sku: str) -> Product | None:  # ← AJOUTE 4 ESPACES ICI
         """Récupère un produit par son SKU (ou None si absent)."""
         with self.connect() as conn:
             cur = conn.execute("SELECT * FROM products WHERE sku = ?", (sku,))
@@ -163,7 +163,7 @@ def get_product_by_sku(self, sku: str) -> Product | None:
                 created_at=str(row["created_at"]),
             )
 
-def get_product_by_id(self, product_id: int) -> Product | None:
+    def get_product_by_id(self, product_id: int) -> Product | None:  # ← AJOUTE 4 ESPACES ICI
         """Récupère un produit par son ID."""
         with self.connect() as conn:
             cur = conn.execute("SELECT * FROM products WHERE id = ?", (product_id,))
@@ -180,5 +180,66 @@ def get_product_by_id(self, product_id: int) -> Product | None:
                 quantity=int(row["quantity"]),
                 created_at=str(row["created_at"]),
             )
+        
+def update_product(self, sku: str, name: str | None = None, 
+                      category: str | None = None, 
+                      unit_price_ht: float | None = None,
+                      quantity: int | None = None, 
+                      vat_rate: float | None = None) -> None:
+        """Met à jour un produit existant (seuls les champs non-None sont modifiés)."""
+        product = self.get_product_by_sku(sku)
+        if not product:
+            raise DatabaseError(f"Produit {sku} introuvable")
+        
+        # construction dynamique de la requete
+        updates = []
+        params = []
+        
+        if name is not None:
+            updates.append("name = ?")
+            params.append(name)
+        if category is not None:
+            updates.append("category = ?")
+            params.append(category)
+        if unit_price_ht is not None:
+            updates.append("unit_price_ht = ?")
+            params.append(unit_price_ht)
+        if quantity is not None:
+            updates.append("quantity = ?")
+            params.append(quantity)
+        if vat_rate is not None:
+            updates.append("vat_rate = ?")
+            params.append(vat_rate)
+        
+        if not updates:
+            return  # rien a modifier
+        
+        params.append(sku)
+        sql = f"UPDATE products SET {', '.join(updates)} WHERE sku = ?"
+        
+        with self.connect() as conn:
+            try:
+                conn.execute(sql, params)
+                conn.commit()
+                logger.info("Produit %s mis à jour", sku)
+            except sqlite3.Error as e:
+                conn.rollback()
+                raise DatabaseError(f"Erreur update produit: {e}") from e
+
+def delete_product(self, sku: str) -> None:
+        """Supprime un produit (ou échoue si FK contrainte)."""
+        with self.connect() as conn:
+            try:
+                cur = conn.execute("DELETE FROM products WHERE sku = ?", (sku,))
+                if cur.rowcount == 0:
+                    raise DatabaseError(f"Produit {sku} introuvable")
+                conn.commit()
+                logger.info("Produit %s supprimé", sku)
+            except sqlite3.IntegrityError as e:
+                conn.rollback()
+                raise DatabaseError(f"Impossible de supprimer : produit lié à des ventes") from e
+            except sqlite3.Error as e:
+                conn.rollback()
+                raise DatabaseError(f"Erreur delete produit: {e}") from e       
 
     # TODO (étudiant) : CRUD complet, vente atomique, dashboard, export ventes
