@@ -1,0 +1,5 @@
+2025-12-17T12:44:31 | INFO | inventory.cli | App started with db=data/inventory.db
+2025-12-17T12:44:37 | INFO | inventory.services | Initialization requested from JSON: 2
+2025-12-17T12:44:37 | WARNING | inventory.cli | Validation/import error: Fichier introuvable: 2
+2025-12-17T12:44:50 | INFO | inventory.services | Initialization requested from JSON: 8
+2025-12-17T12:44:50 | WARNING | inventory.cli | Validation/import error: Fichier introuvable: 8
