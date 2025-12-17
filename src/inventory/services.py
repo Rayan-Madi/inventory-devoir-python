@@ -78,7 +78,7 @@ def add_product(self, sku: str, name: str, category: str,
         if not (0 <= vat_rate <= 1):
             raise ValueError("TVA doit être entre 0 et 1")
         
-        # verif sku unique
+        # verif sku unique dans la bdd
         existing = self.repo.get_product_by_sku(sku)
         if existing:
             raise ValueError(f"SKU {sku} existe déjà")
@@ -94,6 +94,27 @@ def add_product(self, sku: str, name: str, category: str,
         )
         self.repo.insert_product(prod)
         logger.info("Produit ajouté : %s", sku)
+def update_product(self, sku: str, name: str | None = None,
+                      category: str | None = None,
+                      unit_price_ht: float | None = None,
+                      quantity: int | None = None,
+                      vat_rate: float | None = None) -> None:
+        """Modifie un produit existant."""
+        # validations
+        if unit_price_ht is not None and unit_price_ht < 0:
+            raise ValueError("Prix HT doit être >= 0")
+        if quantity is not None and quantity < 0:
+            raise ValueError("Quantité doit être >= 0")
+        if vat_rate is not None and not (0 <= vat_rate <= 1):
+            raise ValueError("TVA doit être entre 0 et 1")
+        
+        self.repo.update_product(sku, name, category, unit_price_ht, quantity, vat_rate)
+        logger.info("Produit %s modifié", sku)
+
+def delete_product(self, sku: str) -> None:
+        """Supprime un produit."""
+        self.repo.delete_product(sku)
+        logger.info("Produit %s supprimé", sku)
 
     # TODO (étudiant) :
     # - add_product / update_product / delete_product

@@ -111,6 +111,47 @@ def action_add_product(app: InventoryManager) -> None:
     
     app.add_product(sku, name, category, prix_ht, qty, tva)
     print(f"Produit {sku} ajouté avec succès !")
+def action_update_product(app: InventoryManager) -> None:
+    """Modifier un produit."""
+    print("\n--- Modifier un produit ---")
+    sku = _prompt("SKU du produit à modifier : ")
+    
+    # verif existence
+    products = app.list_inventory()
+    if not any(p.sku == sku for p in products):
+        print(f"Produit {sku} introuvable")
+        return
+    
+    print("Laissez vide pour ne pas modifier un champ")
+    name = _prompt("Nouveau nom : ") or None
+    category = _prompt("Nouvelle catégorie : ") or None
+    prix_str = _prompt("Nouveau prix HT : ")
+    qty_str = _prompt("Nouvelle quantité : ")
+    tva_str = _prompt("Nouvelle TVA : ")
+    
+    prix_ht = float(prix_str) if prix_str else None
+    qty = int(qty_str) if qty_str else None
+    tva = float(tva_str) if tva_str else None
+    
+    try:
+        app.update_product(sku, name, category, prix_ht, qty, tva)
+        print(f"Produit {sku} modifié !")
+    except ValueError as e:
+        print(f"Erreur : {e}")
+
+
+def action_delete_product(app: InventoryManager) -> None:
+    """Supprimer un produit."""
+    print("\n--- Supprimer un produit ---")
+    sku = _prompt("SKU du produit à supprimer : ")
+    
+    confirm = _prompt(f"Confirmer la suppression de {sku} ? (oui/non) : ")
+    if confirm.lower() != "oui":
+        print("Suppression annulée")
+        return
+    
+    app.delete_product(sku)
+    print(f"Produit {sku} supprimé !")
 
 
 def main() -> int:
@@ -134,7 +175,11 @@ def main() -> int:
                 action_list_inventory(app)
             elif choice == "3":
                 action_add_product(app)
-            elif choice in { "4", "5", "6", "7"}:
+            elif choice == "4":
+                action_update_product(app)
+            elif choice == "5":
+                action_delete_product(app)
+            elif choice in {"6", "7"}:
                 print("Fonctionnalité TODO : à implémenter par l'étudiant selon l'énoncé.")
             elif choice == "8":
                 print("Au revoir.")
