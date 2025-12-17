@@ -144,5 +144,41 @@ class SQLiteRepository:
                     created_at=str(row["created_at"]),
                 ))
             return out
+        
+def get_product_by_sku(self, sku: str) -> Product | None:
+        """Récupère un produit par son SKU (ou None si absent)."""
+        with self.connect() as conn:
+            cur = conn.execute("SELECT * FROM products WHERE sku = ?", (sku,))
+            row = cur.fetchone()
+            if not row:
+                return None
+            return Product(
+                id=int(row["id"]),
+                sku=str(row["sku"]),
+                name=str(row["name"]),
+                category=str(row["category"]),
+                unit_price_ht=float(row["unit_price_ht"]),
+                vat_rate=float(row["vat_rate"]),
+                quantity=int(row["quantity"]),
+                created_at=str(row["created_at"]),
+            )
+
+def get_product_by_id(self, product_id: int) -> Product | None:
+        """Récupère un produit par son ID."""
+        with self.connect() as conn:
+            cur = conn.execute("SELECT * FROM products WHERE id = ?", (product_id,))
+            row = cur.fetchone()
+            if not row:
+                return None
+            return Product(
+                id=int(row["id"]),
+                sku=str(row["sku"]),
+                name=str(row["name"]),
+                category=str(row["category"]),
+                unit_price_ht=float(row["unit_price_ht"]),
+                vat_rate=float(row["vat_rate"]),
+                quantity=int(row["quantity"]),
+                created_at=str(row["created_at"]),
+            )
 
     # TODO (étudiant) : CRUD complet, vente atomique, dashboard, export ventes
